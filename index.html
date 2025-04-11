@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBNB - Locations de vacances et hébergements uniques</title>
+    <meta name="description" content="Réservez des logements uniques et vivez comme un local partout dans le monde avec RBNB.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <style>
+        /* Styles pour la vignette de connexion */
+        .login-button {
+            background-color: #FF385C;
+            color: white;
+            border: none;
+            border-radius: 21px;
+            padding: 7px 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: 10px;
+        }
+        
+        .login-button:hover {
+            background-color: #E31C5F;
+        }
+        
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-modal.active {
+            display: flex;
+        }
+        
+        .login-container {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            padding: 24px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+            position: relative;
+        }
+        
+        .login-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #484848;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .login-header h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            padding: 12px;
+            border: 1px solid #DDDDDD;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .login-submit {
+            background-color: #FF385C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+        }
+        
+        .login-submit:hover {
+            background-color: #E31C5F;
+        }
+        
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 16px 0;
+            color: #484848;
+        }
+        
+        .login-divider::before,
+        .login-divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #DDDDDD;
+        }
+        
+        .login-divider span {
+            padding: 0 10px;
+            font-size: 14px;
+        }
+        
+        .login-social {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .social-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid #DDDDDD;
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .social-button:hover {
+            background-color: #F7F7F7;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        
+        .login-footer a {
+            color: #FF385C;
+            text-decoration: none;
+        }
+        
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- En-tête du site -->
+    <header class="site-header">
+        <div class="header-container">
+            <!-- Logo -->
+            <div class="logo">
+                <i class="fas fa-house"></i>
+                <span>RBNB</span>
+            </div>
+            
+            <!-- Barre de recherche centrale -->
+            <div class="search-bar">
+                <button class="simple-search">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <span class="search-text">Où voulez-vous aller ?</span>
+                </button>
+            </div>
+            
+            <!-- Menu utilisateur -->
+            <div class="user-menu">
+                <a href="#" class="host-link">Devenez hôte</a>
+                <a href="#" class="lang-switcher">
+                    <i class="fas fa-globe"></i>
+                </a>
+                <!-- Bouton de connexion -->
+                <button class="login-button" id="loginButton">
+                    <i class="fas fa-sign-in-alt"></i> Connexion
+                </button>
+                <div class="user-profile">
+                    <button class="user-profile-button">
+                        <i class="fas fa-bars"></i>
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    <!-- Menu déroulant amélioré -->
+                    <div class="user-dropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-welcome">
+                                <span class="welcome-tag">Nouveau</span>
+                                <h4>Bienvenue sur RBNB</h4>
+                                <p>Créez un compte ou connectez-vous</p>
+                            </div>
+                        </div>
+                        <div class="dropdown-section">
+                            <a href="login.html" class="dropdown-item highlight">
+                                <div class="item-icon"><i class="fas fa-sign-in-alt"></i></div>
+                                <div class="item-content">
+                                    <span>Connexion</span>
+                                    <small>Accédez à votre compte</small>
+                                </div>
+                            </a>
+                            <a href="register.html" class="dropdown-item">
+                                <div class="item-icon"><i class="fas fa-user-plus"></i></div>
+                                <div class="item-content">
+                                    <span>Inscription</span>
+                                    <small>Créez un nouveau compte</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-section">
+                            <h6 class="dropdown-section-title">Hébergement</h6>
+                            <a href="#" class="dropdown-item">
+                                <div class="item-icon accent-red"><i class="fas fa-home"></i></div>
+                                <div class="item-content">
+                                    <span>Héberger des voyageurs</span>
+                                    <small>Mettez votre logement sur RBNB</small>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <div class="item-icon accent-purple"><i class="fas fa-calendar-check"></i></div>
+                                <div class="item-content">
+                                    <span>Organiser une expérience</span>
+                                    <small>Partagez votre passion</small>
+                                </div>
+                                <span class="item-badge">Nouveau</span>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <div class="item-icon accent-green"><i class="fas fa-chart-line"></i></div>
+                                <div class="item-content">
+                                    <span>Tableau de bord</span>
+                                    <small>Gérez vos annonces</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-section">
+                            <a href="#" class="dropdown-item">
+                                <div class="item-icon"><i class="fas fa-question-circle"></i></div>
+                                <div class="item-content">
+                                    <span>Centre d'aide</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <div class="item-icon"><i class="fas fa-headset"></i></div>
+                                <div class="item-content">
+                                    <span>Contacter l'assistance</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Vignette de connexion -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-container">
+            <button class="login-close" id="closeLoginModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="login-header">
+                <h2>Connexion à RBNB de Aymen</h2>
+                <p>Entrez vos identifiants pour accéder à votre compte</p>
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="Votre adresse email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" name="password" required placeholder="Votre mot de passe">
+                </div>
+                <button type="submit" class="login-submit">Se connecter</button>
+            </form>
+            <div class="login-divider">
+                <span>ou</span>
+            </div>
+            <div class="login-social">
+                <button class="social-button">
+                    <i class="fab fa-google"></i>
+                    <span>Continuer avec Google</span>
+                </button>
+                <button class="social-button">
+                    <i class="fab fa-facebook"></i>
+                    <span>Continuer avec Facebook</span>
+                </button>
+                <button class="social-button">
+                    <i class="fab fa-apple"></i>
+                    <span>Continuer avec Apple</span>
+                </button>
+            </div>
+            <div class="login-footer">
+                <p>Vous n'avez pas de compte ? <a href="register.html">Inscrivez-vous</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <main>
+        <!-- Section des filtres de catégories -->
+        <section class="filters-section">
+            <div class="container">
+                <div class="categories-filter">
+                    <button class="category-item active" data-category="panoramic">
+                        <div class="category-icon">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                        <span>Vue panoramique</span>
+                        <span class="category-count">1 254</span>
+                    </button>
+                    <button class="category-item" data-category="seaside">
+                        <div class="category-icon">
+                            <i class="fas fa-water"></i>
+                        </div>
+                        <span>Bord de mer</span>
+                        <span class="category-count">863</span>
+                    </button>
+                    <button class="category-item" data-category="design">
+                        <div class="category-icon">
+                            <i class="fas fa-house-chimney"></i>
+                        </div>
+                        <span>Design</span>
+                        <span class="category-count">1 127</span>
+                    </button>
+                    <button class="category-item" data-category="pools">
+                        <div class="category-icon">
+                            <i class="fas fa-swimming-pool"></i>
+                        </div>
+                        <span>Piscines</span>
+                        <span class="category-count">942</span>
+                    </button>
+                    <button class="category-item" data-category="cabins">
+                        <div class="category-icon">
+                            <i class="fas fa-cabin"></i>
+                        </div>
+                        <span>Cabanes</span>
+                        <span class="category-count">715</span>
+                    </button>
+                    <button class="category-item" data-category="beach">
+                        <div class="category-icon">
+                            <i class="fas fa-umbrella-beach"></i>
+                        </div>
+                        <span>Plages</span>
+                        <span class="category-count">1 089</span>
+                    </button>
+                    <button class="category-item" data-category="castles">
+                        <div class="category-icon">
+                            <i class="fas fa-chess-rook"></i>
+                        </div>
+                        <span>Châteaux</span>
+                        <span class="category-count">182</span>
+                    </button>
+                    <button class="category-item" data-category="domes">
+                        <div class="category-icon">
+                            <i class="fas fa-igloo"></i>
+                        </div>
+                        <span>Dômes</span>
+                        <span class="category-count">326</span>
+                    </button>
+                    <button class="category-item" data-category="countryside">
+                        <div class="category-icon">
+                            <i class="fas fa-tree"></i>
+                        </div>
+                        <span>Campagne</span>
+                        <span class="category-count">798</span>
+                    </button>
+                    <button class="category-item" data-category="tropical">
+                        <div class="category-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <span>Tropical</span>
+                        <span class="category-count">562</span>
+                    </button>
+                    <button class="category-item" data-category="tiny">
+                        <div class="category-icon">
+                            <i class="fas fa-house-damage"></i>
+                        </div>
+                        <span>Mini maisons</span>
+                        <span class="category-count">433</span>
+                    </button>
+                    <button class="category-item" data-category="boats">
+                        <div class="category-icon">
+                            <i class="fas fa-ship"></i>
+                        </div>
+                        <span>Bateaux</span>
+                        <span class="category-count">241</span>
+                    </button>
+                </div>
+                
+                <div class="filters-bar">
+                    <button class="filter-button">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Filtres</span>
+                    </button>
+                    <button class="toggle-view-button">
+                        <span>Afficher la carte</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section des logements -->
+        <section class="listings-section">
+            <div class="container">
+                <div class="listings-grid">
+                    <!-- Logement 1 -->
+                    <div class="listing-card">
+                        <div class="listing-gallery">
+                            <img src="https://images.unsplash.com/photo-1513584684374-8bab748fbf90?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Appartement luxueux">
+                            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Appartement luxueux">
+                            <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Appartement luxueux">
+                            <button class="favorite-button">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-header">
+                                <h3 class="listing-title">Appartement luxueux avec vue mer</h3>
+                                <div class="listing-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.92</span>
+                                </div>
+                            </div>
+                            <p class="listing-distance">À 12 kilomètres</p>
+                            <p class="listing-dates">5-11 novembre</p>
+                            <p class="listing-price" data-base-price="125" data-tax-price="145"><strong>125 €</strong> par nuit</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Logement 2 -->
+                    <div class="listing-card">
+                        <div class="listing-gallery">
+                            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Villa moderne">
+                            <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Villa moderne">
+                            <button class="favorite-button">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-header">
+                                <h3 class="listing-title">Villa moderne avec piscine privée</h3>
+                                <div class="listing-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.87</span>
+                                </div>
+                            </div>
+                            <p class="listing-distance">À 8 kilomètres</p>
+                            <p class="listing-dates">1-7 décembre</p>
+                            <p class="listing-price" data-base-price="280" data-tax-price="320"><strong>280 €</strong> par nuit</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Logement 3 -->
+                    <div class="listing-card">
+                        <div class="listing-gallery">
+                            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Maison contemporaine">
+                            <img src="https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Maison contemporaine">
+                            <button class="favorite-button">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-header">
+                                <h3 class="listing-title">Maison contemporaine au bord du lac</h3>
+                                <div class="listing-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.95</span>
+                                </div>
+                            </div>
+                            <p class="listing-distance">À 65 kilomètres</p>
+                            <p class="listing-dates">15-21 novembre</p>
+                            <p class="listing-price" data-base-price="195" data-tax-price="228"><strong>195 €</strong> par nuit</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Logement 4 -->
+                    <div class="listing-card">
+                        <div class="listing-gallery">
+                            <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Loft urbain">
+                            <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Loft urbain">
+                            <button class="favorite-button favorite-active">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-header">
+                                <h3 class="listing-title">Loft urbain en plein centre</h3>
+                                <div class="listing-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.75</span>
+                                </div>
+                            </div>
+                            <p class="listing-distance">À 3 kilomètres</p>
+                            <p class="listing-dates">8-14 novembre</p>
+                            <p class="listing-price" data-base-price="150" data-tax-price="175"><strong>150 €</strong> par nuit</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Logement 5 -->
+                    <div class="listing-card">
+                        <div class="listing-gallery">
+                            <img src="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cabane en bois">
+                            <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cabane en bois">
+                            <button class="favorite-button">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-header">
+                                <h3 class="listing-title">Cabane en bois dans la forêt</h3>
+                                <div class="listing-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.99</span>
+                                </div>
+                            </div>
+                            <p class="listing-distance">À 45 kilomètres</p>
+                            <p class="listing-dates">10-15 décembre</p>
+                            <p class="listing-price" data-base-price="110" data-tax-price="130"><strong>110 €</strong> par nuit</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Logement 6 -->
+                    <div class="listing-card">
+                        <div class="listing-gallery">
+                            <img src="https://images.unsplash.com/photo-1590725121839-892b458a74fe?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Appartement avec terrasse">
+                            <img src="https://images.unsplash.com/photo-1604014238170-4def1e4e6fcf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Appartement avec terrasse">
+                            <button class="favorite-button">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="listing-content">
+                            <div class="listing-header">
+                                <h3 class="listing-title">Appartement avec grande terrasse</h3>
+                                <div class="listing-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.83</span>
+                                </div>
+                            </div>
+                            <p class="listing-distance">À 5 kilomètres</p>
+                            <p class="listing-dates">1-8 janvier</p>
+                            <p class="listing-price" data-base-price="140" data-tax-price="165"><strong>140 €</strong> par nuit</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="load-more">
+                    <button class="load-more-button">
+                        <span>Afficher plus</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Pied de page -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="support">
+                    <h4>Assistance</h4>
+                    <button class="support-button">
+                        <span>Besoin d'aide ?</span>
+                        <i class="fas fa-headset"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="footer-main">
+                <div class="footer-column">
+                    <h5>Assistance</h5>
+                    <ul>
+                        <li><a href="#">Centre d'aide</a></li>
+                        <li><a href="#">Options d'annulation</a></li>
+                        <li><a href="#">Protection contre le COVID-19</a></li>
+                        <li><a href="#">Signaler un problème</a></li>
+                        <li><a href="#">Assistance handicap</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h5>Communauté</h5>
+                    <ul>
+                        <li><a href="#">RBNB.org : aide aux réfugiés</a></li>
+                        <li><a href="#">Lutte contre la discrimination</a></li>
+                        <li><a href="#">Inviter des amis</a></li>
+                        <li><a href="#">Offres pour les entreprises</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h5>Hébergement</h5>
+                    <ul>
+                        <li><a href="#">Héberger des voyageurs</a></li>
+                        <li><a href="#">Accueil responsable</a></li>
+                        <li><a href="#">Ressources</a></li>
+                        <li><a href="#">Forum communautaire</a></li>
+                        <li><a href="#">Règles d'annulation</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h5>À propos</h5>
+                    <ul>
+                        <li><a href="#">Newsroom</a></li>
+                        <li><a href="#">Investisseurs</a></li>
+                        <li><a href="#">Carrières</a></li>
+                        <li><a href="#">Lettre des fondateurs</a></li>
+                        <li><a href="#">Nouvelles fonctionnalités</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-legal">
+                    <p>© 2023 RBNB, Inc.</p>
+                    <ul>
+                        <li><a href="#">Confidentialité</a></li>
+                        <li><a href="#">Conditions générales</a></li>
+                        <li><a href="#">Plan du site</a></li>
+                        <li><a href="#">Fonctionnement du site</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-settings">
+                    <div class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span>Français (FR)</span>
+                    </div>
+                    
+                    <div class="currency-selector">
+                        <span>€ EUR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bouton pour afficher le total avec taxes -->
+    <div class="price-display-toggle">
+        <button class="price-toggle-button">
+            <span>Afficher le prix total</span>
+            <div class="toggle-switch">
+                <div class="toggle-slider"></div>
+            </div>
+        </button>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/modern.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Script pour gérer la vignette de connexion
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginButton = document.getElementById('loginButton');
+            const loginModal = document.getElementById('loginModal');
+            const closeLoginModal = document.getElementById('closeLoginModal');
+            const loginForm = document.getElementById('loginForm');
+            
+            // Ouvrir la vignette de connexion
+            loginButton.addEventListener('click', function() {
+                loginModal.classList.add('active');
+            });
+            
+            // Fermer la vignette de connexion
+            closeLoginModal.addEventListener('click', function() {
+                loginModal.classList.remove('active');
+            });
+            
+            // Fermer la vignette en cliquant en dehors
+            loginModal.addEventListener('click', function(e) {
+                if (e.target === loginModal) {
+                    loginModal.classList.remove('active');
+                }
+            });
+            
+            // Gérer la soumission du formulaire de connexion
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                // Appel à l'API de connexion
+                fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Stocker le token dans le localStorage
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        
+                        // Fermer la vignette
+                        loginModal.classList.remove('active');
+                        
+                        // Mettre à jour l'interface
+                        updateUIAfterLogin(data.user);
+                        
+                        // Afficher un message de succès
+                        alert('Connexion réussie !');
+                    } else {
+                        // Afficher un message d'erreur
+                        alert(data.message || 'Erreur de connexion');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur de connexion au serveur');
+                });
+            });
+            
+            // Fonction pour mettre à jour l'interface après la connexion
+            function updateUIAfterLogin(user) {
+                // Cacher le bouton de connexion
+                loginButton.style.display = 'none';
+                
+                // Mettre à jour le menu utilisateur
+                const userProfileButton = document.querySelector('.user-profile-button');
+                userProfileButton.innerHTML = `
+                    <i class="fas fa-user-circle"></i>
+                    <span>${user.name}</span>
+                `;
+            }
+            
+            // Vérifier si l'utilisateur est déjà connecté
+            const token = localStorage.getItem('token');
+            if (token) {
+                fetch('/api/auth/check-auth', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateUIAfterLogin(data.user);
+                    } else {
+                        // Supprimer le token invalide
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
